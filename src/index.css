@@ -38,20 +38,23 @@ All colors MUST be HSL.
 
     --radius: 0.5rem;
 
+    /* Brand tokens - Tech Futurist */
+    --brand: 221 83% 53%; /* electric blue */
+    --brand-2: 269 83% 60%; /* violet */
+    --brand-glow: 221 100% 70%;
+
+    /* Hero gradient stops (use in component utilities) */
+    --hero-from: var(--brand);
+    --hero-to: var(--brand-2);
+
+    /* Sidebar tokens */
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
@@ -101,5 +104,32 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  /* Hero CTA button variant using brand tokens */
+  .btn-hero {
+    @apply relative inline-flex items-center justify-center rounded-md px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg transition-[background,transform,box-shadow] duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+    background: linear-gradient(135deg, hsl(var(--hero-from)) 0%, hsl(var(--hero-to)) 100%);
+    box-shadow: 0 10px 30px -10px hsl(var(--brand) / 0.45), 0 0 0 1px hsl(var(--brand) / 0.2) inset;
+  }
+  .btn-hero:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 38px -12px hsl(var(--brand) / 0.55), 0 0 0 1px hsl(var(--brand) / 0.25) inset;
+  }
+  .btn-hero:active { transform: translateY(0); }
+
+  /* Glass card treatment */
+  .card-glass {
+    @apply rounded-lg border bg-background/60 backdrop-blur supports-[backdrop-filter]:bg-background/50;
+    box-shadow: 0 1px 0 hsl(var(--border)) inset, 0 20px 60px -20px hsl(var(--brand) / 0.25);
+  }
+
+  /* Hero background using brand gradient */
+  .bg-hero {
+    background-image: radial-gradient(1200px 600px at var(--mouse-x, 50%) var(--mouse-y, 30%), hsl(var(--brand) / 0.25), transparent 60%),
+      linear-gradient(120deg, hsl(var(--hero-from)) 0%, hsl(var(--hero-to)) 100%);
+    background-size: cover;
   }
 }
