@@ -23,7 +23,7 @@ const Index = () => {
   const productSchema = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    name: "SentinelOS — AI Physical Security Operations Platform",
+    name: "SecurAPI — AI Physical Security Operations Platform",
     applicationCategory: "SecurityApplication",
     operatingSystem: "Web",
     description: "Connect cameras, access control, alarms and IoT with AI automation to build security workflows in minutes.",

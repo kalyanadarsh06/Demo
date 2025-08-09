@@ -7,7 +7,7 @@ const SiteHeader = () => {
       <nav className="container max-w-6xl mx-auto flex items-center justify-between h-16">
         <a href="/" className="inline-flex items-center gap-2 font-semibold">
           <Shield className="text-primary" />
-          <span>SentinelOS</span>
+          <span>SecurAPI</span>
         </a>
         <div className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
           <a href="#features" className="hover:text-foreground transition-colors">Features</a>
