@@ -5,12 +5,30 @@ export type DeviceRef = {
   id: string;
   type: string;
   location: Location;
+  capabilities?: string[];
+  aiMappingConfidence?: number;
+  alternativeDevices?: DeviceRef[];
+  geminiReasoning?: {
+    selectionRationale: string;
+    riskAssessment: string;
+    alternativeAnalysis: string;
+    contextFactors: string[];
+  };
 };
 
 export type Trigger = {
   source: string;
   eventType: string;
   parameters?: object;
+  naturalLanguageDescription?: string;
+  aiParsed?: boolean;
+  confidence?: number;
+  contextualFactors?: {
+    timeRelevance: string;
+    locationFactors: string[];
+    threatLevel: "low" | "medium" | "high" | "critical";
+    expectedFrequency: string;
+  };
 };
 
 export type Location = {
@@ -38,6 +56,11 @@ export type Step = {
   action: string;
   parameters?: object;
   escalation?: EscalationRef;
+  aiParsed?: boolean;
+  naturalLanguageIntent?: string;
+  alternatives?: Step[];
+  multimodalContext?: MultimodalContext;
+  reasoning?: string;
 };
 
 export type Workflow = {
@@ -46,10 +69,14 @@ export type Workflow = {
   description?: string;
   steps: Step[];
   triggers: Trigger[];
-  source: "custom" | "template";
+  source: "custom" | "template" | "ai_generated";
   location?: Location;
   schedule?: Schedule;
   complianceTags?: string[];
+  aiMetadata?: AIGenerationMetadata;
+  confidenceScore?: number;
+  validationStatus?: "pending" | "validated" | "rejected";
+  geminiOptimizations?: GeminiOptimizations;
 };
 
 export type Template = {
@@ -66,10 +93,110 @@ export type Template = {
 type Ctx = {
   workflows: Workflow[];
   templates: Template[];
-  addWorkflow: (name: string, steps: Step[], description?: string, triggers?: Trigger[], location?: Location, schedule?: Schedule, complianceTags?: string[]) => Workflow | undefined;
+  addWorkflow: (name: string, steps: Step[], description?: string, triggers?: Trigger[], location?: Location, schedule?: Schedule, complianceTags?: string[], aiMetadata?: AIGenerationMetadata, confidenceScore?: number) => Workflow | undefined;
   activateTemplate: (id: string) => Workflow | undefined;
   removeWorkflow: (id: string) => void;
   clearWorkflows: () => void;
+  validateWorkflow?: (id: string, status: "validated" | "rejected") => void;
+};
+
+// AI Generation Types
+export type AIGenerationMetadata = {
+  originalPrompt: string;
+  llmModel: "gemini-1.5-flash" | "gemini-1.5-pro" | "backup-model";
+  generatedAt: Date;
+  tokenUsage: {
+    prompt: number;
+    completion: number;
+    total: number;
+    contextWindowUsed: number;
+  };
+  processingTime: number;
+  iterationCount: number;
+  geminiSpecificMetrics: {
+    safetyRatings: SafetyRating[];
+    finishReason: string;
+    candidateCount: number;
+  };
+};
+
+export type GeminiOptimizations = {
+  contextWindow: "standard" | "extended";
+  multimodalInputs: MultimodalInput[];
+  reasoningChain: ReasoningStep[];
+  confidenceBreakdown: {
+    triggerConfidence: number;
+    deviceMappingConfidence: number;
+    complianceConfidence: number;
+    overallReasoning: string;
+  };
+  alternatives: {
+    primary: Workflow;
+    secondary: Workflow[];
+    reasoning: string[];
+  };
+};
+
+export type MultimodalContext = {
+  images?: {
+    floorPlan?: string;
+    devicePhotos?: string[];
+    signage?: string[];
+  };
+  videos?: {
+    trainingFootage?: string[];
+    procedureDemo?: string[];
+  };
+  audio?: {
+    alertSounds?: string[];
+    trainingAudio?: string[];
+  };
+  documents?: {
+    policies?: string[];
+    floorPlans?: string[];
+    complianceDocs?: string[];
+  };
+};
+
+export type MultimodalInput = {
+  type: "image" | "video" | "audio" | "document";
+  content: string;
+  description: string;
+  relevance: number;
+};
+
+export type ReasoningStep = {
+  step: number;
+  question: string;
+  analysis: string;
+  conclusion: string;
+  confidence: number;
+};
+
+export type SafetyRating = {
+  category: "HARM_CATEGORY_HARASSMENT" | "HARM_CATEGORY_HATE_SPEECH" | "HARM_CATEGORY_SEXUALLY_EXPLICIT" | "HARM_CATEGORY_DANGEROUS_CONTENT";
+  probability: "NEGLIGIBLE" | "LOW" | "MEDIUM" | "HIGH";
+};
+
+// Workflow Generation Result
+export type WorkflowGenerationResult = {
+  success: boolean;
+  workflow?: Workflow;
+  confidence: number;
+  warnings: string[];
+  suggestions: string[];
+  alternativeWorkflows?: Workflow[];
+  tokensUsed: number;
+  processingTime: number;
+  error?: string;
+  geminiEnhancements?: {
+    reasoningChain: ReasoningStep[];
+    visualAnalysis?: string;
+    contextualInsights: string[];
+    riskAssessment: string;
+    complianceAnalysis: string;
+    alternativeApproaches: string[];
+  };
 };
 
 const defaultTemplates: Template[] = [
@@ -184,7 +311,7 @@ export function WorkflowsProvider({ children }: { children: React.ReactNode }) {
 
   const templates = useMemo(() => defaultTemplates, []);
 
-  const addWorkflow = (name: string, steps: Step[], description?: string, triggers: Trigger[] = [], location?: Location, schedule?: Schedule, complianceTags?: string[]) => {
+  const addWorkflow = (name: string, steps: Step[], description?: string, triggers: Trigger[] = [], location?: Location, schedule?: Schedule, complianceTags?: string[], aiMetadata?: AIGenerationMetadata, confidenceScore?: number) => {
     if (!name.trim() || steps.length === 0) return undefined;
     const wf: Workflow = { 
       id: `wf_${Date.now()}`, 
@@ -192,10 +319,13 @@ export function WorkflowsProvider({ children }: { children: React.ReactNode }) {
       description,
       steps, 
       triggers,
-      source: "custom",
+      source: aiMetadata ? "ai_generated" : "custom",
       location,
       schedule,
-      complianceTags
+      complianceTags,
+      aiMetadata,
+      confidenceScore,
+      validationStatus: aiMetadata ? "pending" : undefined
     };
     setWorkflows((prev) => [wf, ...prev]);
     return wf;

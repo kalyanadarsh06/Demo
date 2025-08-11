@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useWorkflows, type Step as ContextStep, type Workflow, type Template, type Trigger, type Location, type Schedule } from "@/context/WorkflowsContext";
-import { Plus, Trash2, Camera, Shield, AlertTriangle, Zap, Bell, Eye, Lock, Save, GripVertical, Radio, Users, Megaphone, DoorClosed, FileText, Clock, MapPin, Tag } from "lucide-react";
+import AIAssistant from "@/components/AIAssistant";
+import { Plus, Trash2, Camera, Shield, AlertTriangle, Zap, Bell, Eye, Lock, Save, GripVertical, Radio, Users, Megaphone, DoorClosed, FileText, Clock, MapPin, Tag, Sparkles, LockIcon } from "lucide-react";
 
 const PALETTE = [
   { id: "camera", label: "CCTV Motion Detection", icon: Camera, description: "Detects motion from security cameras" },
@@ -242,9 +243,14 @@ const WorkflowBuilder = ({ onRun }: { onRun: (steps: Step[]) => void }) => {
       </div>
       
       <Tabs defaultValue="builder" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-8">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="builder">Workflow Builder</TabsTrigger>
           <TabsTrigger value="templates">Pre-built Templates</TabsTrigger>
+          <TabsTrigger value="ai-assistant" className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4" />
+            AI Assistant
+            <LockIcon className="w-3 h-3 opacity-50" />
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="builder">
@@ -472,6 +478,22 @@ const WorkflowBuilder = ({ onRun }: { onRun: (steps: Step[]) => void }) => {
               ))}
             </div>
           </div>
+        </TabsContent>
+        
+        <TabsContent value="ai-assistant" className="space-y-6">
+          <AIAssistant onWorkflowGenerated={(workflow) => {
+            // Add the AI-generated workflow to saved workflows
+            const newWorkflow: SavedWorkflow = {
+              id: workflow.id,
+              name: workflow.name,
+              description: workflow.description,
+              steps: workflow.steps,
+              triggers: workflow.triggers,
+              isActive: false, // Start as inactive for review
+              complianceTags: workflow.complianceTags
+            };
+            setSavedWorkflows(prev => [...prev, newWorkflow]);
+          }} />
         </TabsContent>
       </Tabs>
       
