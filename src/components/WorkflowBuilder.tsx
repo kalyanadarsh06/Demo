@@ -7,103 +7,39 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Trash2, Camera, Shield, AlertTriangle, Zap, Bell, Eye, Lock, Save, GripVertical } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useWorkflows, type Step as ContextStep, type Workflow, type Template, type Trigger, type Location, type Schedule } from "@/context/WorkflowsContext";
+import AIAssistant from "@/components/AIAssistant";
+import { Plus, Trash2, Camera, Shield, AlertTriangle, Zap, Bell, Eye, Lock, Save, GripVertical, Radio, Users, Megaphone, DoorClosed, FileText, Clock, MapPin, Tag, Sparkles, LockIcon } from "lucide-react";
 
 const PALETTE = [
   { id: "camera", label: "CCTV Motion Detection", icon: Camera, description: "Detects motion from security cameras" },
-  { id: "access", label: "Access Control Alert", icon: Lock, description: "Monitors door access and unauthorized entry" },
-  { id: "yolo", label: "AI Vision Analysis", icon: Eye, description: "YOLOv10 object detection and classification" },
-  { id: "notify", label: "Security Alert", icon: Bell, description: "Sends notifications to security personnel" },
-  { id: "escalate", label: "Emergency Response", icon: AlertTriangle, description: "Escalates to authorities or emergency services" },
-  { id: "alarm", label: "Alarm System", icon: Shield, description: "Triggers building alarm systems" },
+  { id: "ai-vision", label: "AI Vision Analysis", icon: Eye, description: "Object/weapon detection with zone mapping" },
+  { id: "access-alert", label: "Access Control Alert", icon: Lock, description: "Unauthorized, forced, or door held open alerts" },
+  { id: "badge-reader", label: "Badge Reader Event", icon: Radio, description: "Authorized entry, failed attempt, or RFID events" },
+  { id: "visitor-mgmt", label: "Visitor Management Event", icon: Users, description: "Unscheduled visitor or VIP arrival notifications" },
+  { id: "emergency-alert", label: "Emergency Alert", icon: AlertTriangle, description: "Fire, medical emergency, or panic button events" },
+  { id: "alarm-system", label: "Alarm System", icon: Shield, description: "Intrusion, fire, or environmental alarms" },
+  { id: "facility-broadcast", label: "Facility Broadcast", icon: Megaphone, description: "PA system, intercom, or SMS notifications" },
+  { id: "lockdown-cmd", label: "Lockdown Command", icon: DoorClosed, description: "Lock doors/zones, flash lights, display signage" },
+  { id: "compliance-audit", label: "Compliance Audit Event", icon: FileText, description: "Log all steps for after-action review" },
 ];
 
-const TEMPLATES = [
-  {
-    id: "intrusion-detection",
-    name: "Intrusion Detection",
-    description: "Comprehensive perimeter security with AI analysis",
-    steps: [
-      { id: "camera-1", label: "CCTV Motion Detection", icon: Camera },
-      { id: "yolo-1", label: "AI Vision Analysis", icon: Eye },
-      { id: "notify-1", label: "Security Alert", icon: Bell },
-      { id: "escalate-1", label: "Emergency Response", icon: AlertTriangle }
-    ]
-  },
-  {
-    id: "access-monitoring",
-    name: "Access Control Monitoring",
-    description: "Monitor and respond to unauthorized access attempts",
-    steps: [
-      { id: "access-1", label: "Access Control Alert", icon: Lock },
-      { id: "camera-2", label: "CCTV Motion Detection", icon: Camera },
-      { id: "yolo-2", label: "AI Vision Analysis", icon: Eye },
-      { id: "alarm-1", label: "Alarm System", icon: Shield }
-    ]
-  },
-  {
-    id: "perimeter-security",
-    name: "Perimeter Security",
-    description: "24/7 automated perimeter monitoring and response",
-    steps: [
-      { id: "camera-3", label: "CCTV Motion Detection", icon: Camera },
-      { id: "yolo-3", label: "AI Vision Analysis", icon: Eye },
-      { id: "notify-2", label: "Security Alert", icon: Bell },
-      { id: "alarm-2", label: "Alarm System", icon: Shield },
-      { id: "escalate-2", label: "Emergency Response", icon: AlertTriangle }
-    ]
-  },
-  {
-    id: "night-security",
-    name: "Night Security Protocol",
-    description: "Automated night-time security monitoring and response",
-    steps: [
-      { id: "camera-4", label: "CCTV Motion Detection", icon: Camera },
-      { id: "yolo-4", label: "AI Vision Analysis", icon: Eye },
-      { id: "notify-3", label: "Security Alert", icon: Bell },
-      { id: "escalate-3", label: "Emergency Response", icon: AlertTriangle }
-    ]
-  },
-  {
-    id: "breach-response",
-    name: "Perimeter Breach Response",
-    description: "Immediate response protocol for perimeter breaches",
-    steps: [
-      { id: "camera-5", label: "CCTV Motion Detection", icon: Camera },
-      { id: "yolo-5", label: "AI Vision Analysis", icon: Eye },
-      { id: "alarm-3", label: "Alarm System", icon: Shield },
-      { id: "notify-4", label: "Security Alert", icon: Bell },
-      { id: "escalate-4", label: "Emergency Response", icon: AlertTriangle }
-    ]
-  },
-  {
-    id: "fire-safety",
-    name: "Fire Safety Integration",
-    description: "Integrated fire detection and emergency response",
-    steps: [
-      { id: "alarm-4", label: "Alarm System", icon: Shield },
-      { id: "notify-5", label: "Security Alert", icon: Bell },
-      { id: "escalate-5", label: "Emergency Response", icon: AlertTriangle }
-    ]
-  },
-  {
-    id: "visitor-management",
-    name: "Visitor Management",
-    description: "Automated visitor tracking and access control",
-    steps: [
-      { id: "access-2", label: "Access Control Alert", icon: Lock },
-      { id: "camera-6", label: "CCTV Motion Detection", icon: Camera },
-      { id: "yolo-6", label: "AI Vision Analysis", icon: Eye },
-      { id: "notify-6", label: "Security Alert", icon: Bell }
-    ]
-  }
-];
+// Templates are now managed in WorkflowsContext with enhanced schema
+// This component will use the templates from context
 
 type SavedWorkflow = {
   id: string;
   name: string;
+  description?: string;
   steps: Step[];
+  triggers: Trigger[];
   isActive: boolean;
+  location?: Location;
+  schedule?: Schedule;
+  complianceTags?: string[];
 };
 
 function Draggable({ id, label, icon: Icon, description }: { id: string; label: string; icon: any; description: string }) {
@@ -182,13 +118,17 @@ function Canvas({ children }: { children: React.ReactNode }) {
   );
 }
 
-export type Step = { id: string; label: string; icon?: any };
+export type Step = { id: string; label: string; icon?: any; action: string; parameters?: object; device?: any; escalation?: any };
 
 const WorkflowBuilder = ({ onRun }: { onRun: (steps: Step[]) => void }) => {
+  const { templates, workflows, addWorkflow, activateTemplate, removeWorkflow } = useWorkflows();
   const [steps, setSteps] = useState<Step[]>([]);
   const [savedWorkflows, setSavedWorkflows] = useState<SavedWorkflow[]>([]);
   const [isPromptingName, setIsPromptingName] = useState(false);
   const [workflowName, setWorkflowName] = useState("");
+  const [workflowDescription, setWorkflowDescription] = useState("");
+  const [selectedSector, setSelectedSector] = useState<string>("");
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -208,7 +148,8 @@ const WorkflowBuilder = ({ onRun }: { onRun: (steps: Step[]) => void }) => {
         setSteps(prev => [...prev, { 
           id: `${item.id}-${Date.now()}`, 
           label: item.label, 
-          icon: item.icon 
+          icon: item.icon,
+          action: item.description // Use description as default action
         }]);
       }
       return;
@@ -223,18 +164,24 @@ const WorkflowBuilder = ({ onRun }: { onRun: (steps: Step[]) => void }) => {
     }
   };
 
-  const loadTemplate = (template: typeof TEMPLATES[0]) => {
+  const loadTemplate = (template: Template) => {
     setSteps(template.steps);
   };
 
-  const activateTemplate = (template: typeof TEMPLATES[0]) => {
-    const newWorkflow: SavedWorkflow = {
-      id: `activated-${Date.now()}`,
-      name: template.name,
-      steps: template.steps,
-      isActive: true
-    };
-    setSavedWorkflows(prev => [...prev, newWorkflow]);
+  const activateTemplateLocal = (template: Template) => {
+    const workflow = activateTemplate(template.id);
+    if (workflow) {
+      const newWorkflow: SavedWorkflow = {
+        id: workflow.id,
+        name: workflow.name,
+        description: workflow.description,
+        steps: workflow.steps,
+        triggers: workflow.triggers,
+        isActive: true,
+        complianceTags: workflow.complianceTags
+      };
+      setSavedWorkflows(prev => [...prev, newWorkflow]);
+    }
   };
 
   const toggleWorkflow = (workflowId: string) => {
@@ -247,15 +194,32 @@ const WorkflowBuilder = ({ onRun }: { onRun: (steps: Step[]) => void }) => {
 
   const saveWorkflow = () => {
     if (workflowName.trim()) {
-      const newWorkflow: SavedWorkflow = {
-        id: `custom-${Date.now()}`,
-        name: workflowName.trim(),
-        steps: steps,
-        isActive: true
-      };
-      setSavedWorkflows(prev => [...prev, newWorkflow]);
+      const workflow = addWorkflow(
+        workflowName.trim(),
+        steps,
+        workflowDescription.trim() || undefined,
+        [], // triggers - can be enhanced later
+        undefined, // location - can be enhanced later
+        undefined, // schedule - can be enhanced later
+        [] // complianceTags - can be enhanced later
+      );
+      
+      if (workflow) {
+        const newWorkflow: SavedWorkflow = {
+          id: workflow.id,
+          name: workflow.name,
+          description: workflow.description,
+          steps: workflow.steps,
+          triggers: workflow.triggers,
+          isActive: true,
+          complianceTags: workflow.complianceTags
+        };
+        setSavedWorkflows(prev => [...prev, newWorkflow]);
+      }
+      
       setSteps([]);
       setWorkflowName("");
+      setWorkflowDescription("");
       setIsPromptingName(false);
     }
   };
@@ -268,6 +232,7 @@ const WorkflowBuilder = ({ onRun }: { onRun: (steps: Step[]) => void }) => {
   const cancelSave = () => {
     setIsPromptingName(false);
     setWorkflowName("");
+    setWorkflowDescription("");
   };
 
   return (
@@ -278,9 +243,14 @@ const WorkflowBuilder = ({ onRun }: { onRun: (steps: Step[]) => void }) => {
       </div>
       
       <Tabs defaultValue="builder" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-8">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="builder">Workflow Builder</TabsTrigger>
           <TabsTrigger value="templates">Pre-built Templates</TabsTrigger>
+          <TabsTrigger value="ai-assistant" className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4" />
+            AI Assistant
+            <LockIcon className="w-3 h-3 opacity-50" />
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="builder">
@@ -322,31 +292,75 @@ const WorkflowBuilder = ({ onRun }: { onRun: (steps: Step[]) => void }) => {
                     )}
                   </Canvas>
                 </div>
-                {isPromptingName ? (
-                  <div className="space-y-4 p-4 bg-muted/50 rounded-lg border">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Workflow Name</label>
-                      <input 
-                        type="text"
-                        value={workflowName}
-                        onChange={(e) => setWorkflowName(e.target.value)}
-                        placeholder="Enter workflow name..."
-                        className="w-full px-3 py-2 border rounded-md bg-background"
-                        autoFocus
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') saveWorkflow();
-                          if (e.key === 'Escape') cancelSave();
-                        }}
-                      />
-                    </div>
-                    <div className="flex gap-2">
-                      <Button onClick={saveWorkflow} disabled={!workflowName.trim()} className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90">
-                        <Save className="w-4 h-4 mr-2" /> Save Workflow
-                      </Button>
-                      <Button variant="outline" onClick={cancelSave}>Cancel</Button>
-                    </div>
+                {isPromptingName && (
+                  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <Card className="p-6 w-full max-w-lg mx-4">
+                      <div className="space-y-4">
+                        <div>
+                          <h3 className="font-semibold">Save Workflow</h3>
+                          <p className="text-sm text-muted-foreground">Enter details for your custom workflow</p>
+                        </div>
+                        
+                        <div className="space-y-3">
+                          <div>
+                            <Label htmlFor="workflow-name">Workflow Name *</Label>
+                            <Input
+                              id="workflow-name"
+                              type="text"
+                              value={workflowName}
+                              onChange={(e) => setWorkflowName(e.target.value)}
+                              placeholder="Enter workflow name..."
+                              autoFocus
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' && workflowName.trim()) saveWorkflow();
+                                if (e.key === 'Escape') cancelSave();
+                              }}
+                            />
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor="workflow-description">Description (Optional)</Label>
+                            <Input
+                              id="workflow-description"
+                              type="text"
+                              value={workflowDescription}
+                              onChange={(e) => setWorkflowDescription(e.target.value)}
+                              placeholder="Brief description of workflow purpose..."
+                            />
+                          </div>
+                          
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="checkbox"
+                              id="advanced-options"
+                              checked={showAdvancedOptions}
+                              onChange={(e) => setShowAdvancedOptions(e.target.checked)}
+                              className="rounded"
+                            />
+                            <Label htmlFor="advanced-options" className="text-sm">Show advanced options</Label>
+                          </div>
+                          
+                          {showAdvancedOptions && (
+                            <div className="space-y-3 p-3 bg-muted/20 rounded-md">
+                              <p className="text-xs text-muted-foreground">Advanced features like triggers, device mapping, schedules, and compliance tags will be available in future updates.</p>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          <Button variant="outline" onClick={cancelSave} className="flex-1">
+                            Cancel
+                          </Button>
+                          <Button onClick={saveWorkflow} className="flex-1" disabled={!workflowName.trim()}>
+                            <Save className="w-4 h-4 mr-2" />
+                            Save Workflow
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
                   </div>
-                ) : (
+                )}
+                {!isPromptingName && (
                   <div className="flex justify-between items-center">
                     <Button variant="outline" onClick={() => setSteps([])} disabled={steps.length === 0}>Clear Canvas</Button>
                     <Button 
@@ -369,65 +383,117 @@ const WorkflowBuilder = ({ onRun }: { onRun: (steps: Step[]) => void }) => {
               <h3 className="text-xl font-semibold">Pre-built Security Templates</h3>
               <p className="text-muted-foreground mt-2">Professional security workflows designed by experts. Activate templates to add them to your saved workflows.</p>
             </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {TEMPLATES.map(template => {
-                const isActivated = savedWorkflows.some(w => w.name === template.name);
-                return (
-                  <Card key={template.id} className={`p-6 hover:shadow-lg transition-all duration-300 hover:scale-105 ${
-                    isActivated ? 'border-primary bg-primary/5' : 'border-border'
-                  }`}>
-                    <div className="space-y-4">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h3 className="text-lg font-semibold">{template.name}</h3>
-                          <p className="text-sm text-muted-foreground mt-1">{template.description}</p>
-                        </div>
-                        {isActivated && (
-                          <Badge variant="default" className="text-xs">Active</Badge>
-                        )}
+            <div className="mb-4">
+              <Label htmlFor="sector-filter">Filter by Sector</Label>
+              <Select value={selectedSector} onValueChange={setSelectedSector}>
+                <SelectTrigger className="w-full mt-1">
+                  <SelectValue placeholder="All Sectors" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Sectors</SelectItem>
+                  <SelectItem value="Education">Education</SelectItem>
+                  <SelectItem value="Healthcare">Healthcare</SelectItem>
+                  <SelectItem value="Commercial">Commercial</SelectItem>
+                  <SelectItem value="Retail">Retail</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid md:grid-cols-1 lg:grid-cols-2 gap-4">
+              {templates
+                .filter(template => selectedSector === "all" || !selectedSector || template.sector === selectedSector)
+                .map((template) => (
+                <Card key={template.id} className="p-4 hover:shadow-md transition-shadow">
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-semibold">{template.name}</h3>
+                        <Badge variant="outline" className="text-xs">{template.sector}</Badge>
                       </div>
+                      <p className="text-sm text-muted-foreground">{template.description}</p>
+                    </div>
+                    
+                    {template.triggers.length > 0 && (
                       <div className="space-y-2">
-                        <div className="text-sm font-medium text-muted-foreground">Workflow Steps:</div>
+                        <div className="text-xs font-medium text-muted-foreground">TRIGGERS:</div>
+                        <div className="flex flex-wrap gap-1">
+                          {template.triggers.map((trigger, index) => (
+                            <Badge key={index} variant="secondary" className="text-xs">
+                              <Zap className="w-3 h-3 mr-1" />
+                              {trigger.eventType}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="space-y-2">
+                      <div className="text-xs font-medium text-muted-foreground">WORKFLOW STEPS:</div>
+                      <div className="flex flex-wrap gap-1">
                         {template.steps.map((step, index) => {
-                          const Icon = step.icon;
+                          const Icon = step.icon || FileText;
                           return (
-                            <div key={step.id} className="flex items-center gap-2 text-sm">
-                              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10">
-                                <span className="text-xs font-medium text-primary">{index + 1}</span>
-                              </div>
-                              <Icon className="w-4 h-4 text-primary" />
-                              <span>{step.label}</span>
-                            </div>
+                            <Badge key={step.id} variant="secondary" className="text-xs">
+                              <Icon className="w-3 h-3 mr-1" />
+                              {step.label}
+                            </Badge>
                           );
                         })}
                       </div>
-                      <div className="flex gap-2">
-                        <Button 
-                          onClick={() => loadTemplate(template)} 
-                          className="flex-1 gap-2 hover:scale-105 transition-all duration-200"
-                          variant="outline"
-                          size="sm"
-                        >
-                          <Plus className="w-4 h-4" /> Load to Canvas
-                        </Button>
-                        <Button 
-                          onClick={() => activateTemplate(template)} 
-                          className={`gap-2 hover:scale-105 transition-all duration-200 ${
-                            isActivated ? 'opacity-50 cursor-not-allowed' : ''
-                          }`}
-                          variant={isActivated ? "secondary" : "default"}
-                          size="sm"
-                          disabled={isActivated}
-                        >
-                          <Zap className="w-4 h-4" /> {isActivated ? 'Activated' : 'Activate'}
-                        </Button>
-                      </div>
                     </div>
-                  </Card>
-                );
-              })}
+                    
+                    {template.complianceTags.length > 0 && (
+                      <div className="space-y-2">
+                        <div className="text-xs font-medium text-muted-foreground">COMPLIANCE:</div>
+                        <div className="flex flex-wrap gap-1">
+                          {template.complianceTags.map((tag, index) => (
+                            <Badge key={index} variant="outline" className="text-xs">
+                              <Tag className="w-3 h-3 mr-1" />
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => loadTemplate(template)}
+                        className="flex-1"
+                      >
+                        Load to Builder
+                      </Button>
+                      <Button 
+                        variant="default" 
+                        size="sm" 
+                        onClick={() => activateTemplateLocal(template)}
+                        className="flex-1"
+                      >
+                        Activate Now
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
             </div>
           </div>
+        </TabsContent>
+        
+        <TabsContent value="ai-assistant" className="space-y-6">
+          <AIAssistant onWorkflowGenerated={(workflow) => {
+            // Add the AI-generated workflow to saved workflows
+            const newWorkflow: SavedWorkflow = {
+              id: workflow.id,
+              name: workflow.name,
+              description: workflow.description,
+              steps: workflow.steps,
+              triggers: workflow.triggers,
+              isActive: false, // Start as inactive for review
+              complianceTags: workflow.complianceTags
+            };
+            setSavedWorkflows(prev => [...prev, newWorkflow]);
+          }} />
         </TabsContent>
       </Tabs>
       

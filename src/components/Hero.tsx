@@ -29,7 +29,7 @@ const Hero = () => {
   }, []);
 
   return (
-    <section ref={ref} className="relative overflow-hidden min-h-screen flex items-center">
+    <section ref={ref} className="relative overflow-hidden min-h-[calc(100vh-90px)] flex items-center">
       <div className="absolute inset-0" aria-hidden="true">
         {/* Security-themed static background with circuit patterns and geometric shapes */}
         <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950" />
@@ -68,7 +68,7 @@ const Hero = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/85 to-background/95" />
       </div>
       <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-center min-h-[80vh]">
+        <div className="flex items-center justify-center min-h-[60vh]">
           <div className="flex flex-col justify-center items-center text-center space-y-6 animate-fade-in-up">
             <div className="inline-flex items-center gap-2 text-sm font-medium text-primary/90 mb-2 animate-fade-in-up animation-delay-200">
               <Shield className="text-primary animate-pulse" /> AI Security Operations
