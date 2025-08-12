@@ -129,6 +129,7 @@ const WorkflowBuilder = ({ onRun }: { onRun: (steps: Step[]) => void }) => {
   const [workflowDescription, setWorkflowDescription] = useState("");
   const [selectedSector, setSelectedSector] = useState<string>("");
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+  const [activeTab, setActiveTab] = useState("builder");
   
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -166,6 +167,7 @@ const WorkflowBuilder = ({ onRun }: { onRun: (steps: Step[]) => void }) => {
 
   const loadTemplate = (template: Template) => {
     setSteps(template.steps);
+    setActiveTab("builder"); // Switch to builder tab
   };
 
   const activateTemplateLocal = (template: Template) => {
@@ -242,7 +244,7 @@ const WorkflowBuilder = ({ onRun }: { onRun: (steps: Step[]) => void }) => {
         <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">Build custom security workflows by dragging components, or start with pre-built templates designed by security experts.</p>
       </div>
       
-      <Tabs defaultValue="builder" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="builder">Workflow Builder</TabsTrigger>
           <TabsTrigger value="templates">Pre-built Templates</TabsTrigger>
