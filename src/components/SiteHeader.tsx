@@ -19,7 +19,6 @@ const SiteHeader = () => {
           <a href="#features" className="hover:text-foreground transition-colors">Features</a>
           <a href="#integrations" className="hover:text-foreground transition-colors">Integrations</a>
           <a href="/workflows" className="hover:text-foreground transition-colors">Workflows</a>
-          <a href="/demo" className="hover:text-foreground transition-colors">Live Demo</a>
           <a href="/enhanced-demo" className="hover:text-foreground transition-colors font-medium text-primary">Enhanced Demo</a>
         </div>
         <div className="flex items-center gap-3">
