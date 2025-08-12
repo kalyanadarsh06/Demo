@@ -1,12 +1,18 @@
 import { Button } from "@/components/ui/button";
-import { Shield, Zap, Boxes } from "lucide-react";
+import { Zap, Boxes } from "lucide-react";
 
 const SiteHeader = () => {
   return (
     <header className="w-full sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-background/70 border-b">
       <nav className="container max-w-6xl mx-auto flex items-center justify-between h-16">
         <a href="/" className="inline-flex items-center gap-2 font-semibold">
-          <Shield className="text-primary" />
+          <img 
+            src="/logo.jpg" 
+            alt="Convergence Logo" 
+            width={32} 
+            height={32} 
+            className="rounded-md object-cover"
+          />
           <span>Convergence</span>
         </a>
         <div className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">

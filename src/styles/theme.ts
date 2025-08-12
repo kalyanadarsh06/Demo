@@ -69,9 +69,9 @@ export const animations = {
 
 // Layout Constants
 export const layout = {
-  header: 'h-16',
+  header: 'h-20',
   footer: 'h-12',
-  leftPanel: 'w-96 min-w-0 flex-shrink-0',
-  rightPanel: 'w-80 min-w-0 flex-shrink-0',
+  leftPanel: 'w-80 min-w-0 flex-shrink-0',
+  rightPanel: 'w-72 min-w-0 flex-shrink-0',
   mainContent: 'flex-1 min-w-0'
 };

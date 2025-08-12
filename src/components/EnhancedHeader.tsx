@@ -166,7 +166,7 @@ const EnhancedHeader: React.FC<EnhancedHeaderProps> = ({
   demoStatus, totalEvents, activeWorkflows, systemHealth, progress,
   onStart, onStop, onPause
 }) => (
-  <header className="h-16 border-b border-white/10 bg-gradient-to-r from-slate-900 to-slate-800 relative overflow-hidden">
+  <header className="h-20 border-b border-white/10 bg-gradient-to-r from-slate-900 to-slate-800 relative overflow-hidden">
     {/* Animated Background */}
     <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5" />
     
@@ -175,7 +175,13 @@ const EnhancedHeader: React.FC<EnhancedHeaderProps> = ({
       <div className="flex items-center space-x-4">
         <div className="flex items-center space-x-3">
           <div className="p-2 bg-blue-500/10 rounded-lg border border-blue-500/20">
-            <Shield className="w-6 h-6 text-blue-400" />
+            <img 
+              src="/logo.jpg" 
+              alt="Convergence Logo" 
+              width={24} 
+              height={24} 
+              className="rounded object-cover"
+            />
           </div>
           <div>
             <h1 className={cn(typography.heading, 'text-white')}>Convergence</h1>

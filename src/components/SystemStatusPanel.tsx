@@ -51,7 +51,6 @@ const HealthMetric: React.FC<HealthMetricProps> = ({
         <span className="text-xs text-slate-400">{details}</span>
         <Badge 
           variant="outline" 
-          size="sm" 
           className={cn('text-xs capitalize', config.color, config.border)}
         >
           {status}
@@ -86,7 +85,7 @@ const WorkflowStatusCard: React.FC<WorkflowStatusCardProps> = ({
 }) => {
   const statusConfig = {
     active: { color: 'text-green-400', bg: 'bg-green-500/10', icon: CheckCircle },
-    standby: { color: 'text-blue-400', bg: 'bg-blue-500/10', icon: Clock },
+    standby: { color: 'text-blue-400', bg: 'bg-blue-500/10', icon: Shield },
     executing: { color: 'text-purple-400', bg: 'bg-purple-500/10', icon: Zap },
     error: { color: 'text-red-400', bg: 'bg-red-500/10', icon: XCircle }
   };
@@ -107,7 +106,6 @@ const WorkflowStatusCard: React.FC<WorkflowStatusCardProps> = ({
         </div>
         <Badge 
           variant="outline" 
-          size="sm" 
           className={cn('text-xs capitalize', config.color)}
         >
           {status}
@@ -119,14 +117,6 @@ const WorkflowStatusCard: React.FC<WorkflowStatusCardProps> = ({
           <span className="text-slate-400">Last Triggered:</span>
           <div className="text-white font-mono">{lastTriggered}</div>
         </div>
-      </div>
-      
-      <div className="mt-2">
-        <div className="flex items-center justify-between text-xs mb-1">
-          <span className="text-slate-400">Success Rate</span>
-          <span className="text-green-400 font-bold">{successRate}%</span>
-        </div>
-        <Progress value={successRate} className="h-1" />
       </div>
     </div>
   );

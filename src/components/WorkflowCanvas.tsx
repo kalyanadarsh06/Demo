@@ -55,10 +55,11 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
   useEffect(() => {
     // Layout constants for proper positioning within canvas bounds
     const canvasWidth = 800; // Available canvas width
-    const nodeWidth = 140;   // Width of each node
-    const nodeSpacing = 40;  // Spacing between nodes
+    const nodeWidth = 130;   // Width of each node (reduced for better fit)
+    const nodeSpacing = 50;  // Increased spacing between nodes
     const stepWidth = nodeWidth + nodeSpacing; // Total width per step
     const maxSteps = 4;      // Maximum steps to fit horizontally
+    const verticalSpacing = 80; // Increased vertical spacing between action nodes
     
     if (activeWorkflow === 'weapon') {
       // Active Shooter Lockdown workflow - positioned in upper half
@@ -94,7 +95,7 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
           type: 'action',
           title: 'Lockdown Command',
           subtitle: 'Secure All Entrances',
-          position: { x: 50 + stepWidth * 3, y: 50 },
+          position: { x: 50 + stepWidth * 3, y: 40 },
           status: executionProgress > 60 ? 'completed' : executionProgress > 40 ? 'executing' : 'idle'
         },
         {
@@ -102,7 +103,7 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
           type: 'action',
           title: 'Emergency Alert',
           subtitle: 'Law Enforcement',
-          position: { x: 50 + stepWidth * 3, y: 110 },
+          position: { x: 50 + stepWidth * 3, y: 40 + verticalSpacing },
           status: executionProgress > 80 ? 'completed' : executionProgress > 60 ? 'executing' : 'idle'
         }
       ]);
@@ -138,7 +139,7 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
         }
       ]);
     } else if (activeWorkflow === 'fire') {
-      // Fire Safety workflow - positioned in lower half
+      // Emergency Fire Response workflow - positioned in lower half with increased gap
       setNodes([
         {
           id: 'fire-trigger',
@@ -171,7 +172,7 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
           type: 'action',
           title: 'Fire Alarm',
           subtitle: 'Building-wide Alert',
-          position: { x: 50 + stepWidth * 3, y: 240 },
+          position: { x: 50 + stepWidth * 3, y: 270 },
           status: executionProgress > 50 ? 'completed' : executionProgress > 30 ? 'executing' : 'idle'
         },
         {
@@ -179,7 +180,7 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
           type: 'action',
           title: 'Exit Unlock',
           subtitle: 'Emergency Exits',
-          position: { x: 50 + stepWidth * 3, y: 280 },
+          position: { x: 50 + stepWidth * 3, y: 270 + verticalSpacing },
           status: executionProgress > 70 ? 'completed' : executionProgress > 50 ? 'executing' : 'idle'
         },
         {
@@ -187,7 +188,7 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
           type: 'action',
           title: 'Emergency Services',
           subtitle: 'Fire Department',
-          position: { x: 50 + stepWidth * 3, y: 320 },
+          position: { x: 50 + stepWidth * 3, y: 270 + verticalSpacing * 2 },
           status: executionProgress > 90 ? 'completed' : executionProgress > 70 ? 'executing' : 'idle'
         }
       ]);
@@ -265,7 +266,7 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
           type: 'action',
           title: 'Lockdown Command',
           subtitle: 'Secure All Entrances',
-          position: { x: 50 + stepWidth * 3, y: 50 },
+          position: { x: 50 + stepWidth * 3, y: 40 },
           status: 'idle' as const
         },
         {
@@ -273,7 +274,7 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
           type: 'action',
           title: 'Emergency Alert',
           subtitle: 'Law Enforcement',
-          position: { x: 50 + stepWidth * 3, y: 110 },
+          position: { x: 50 + stepWidth * 3, y: 40 + verticalSpacing },
           status: 'idle' as const
         }
       ];
@@ -310,7 +311,7 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
           type: 'action',
           title: 'Fire Alarm',
           subtitle: 'Building-wide Alert',
-          position: { x: 50 + stepWidth * 3, y: 240 },
+          position: { x: 50 + stepWidth * 3, y: 270 },
           status: 'idle' as const
         },
         {
@@ -318,7 +319,7 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
           type: 'action',
           title: 'Exit Unlock',
           subtitle: 'Emergency Exits',
-          position: { x: 50 + stepWidth * 3, y: 280 },
+          position: { x: 50 + stepWidth * 3, y: 270 + verticalSpacing },
           status: 'idle' as const
         },
         {
@@ -326,7 +327,7 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
           type: 'action',
           title: 'Emergency Services',
           subtitle: 'Fire Department',
-          position: { x: 50 + stepWidth * 3, y: 320 },
+          position: { x: 50 + stepWidth * 3, y: 270 + verticalSpacing * 2 },
           status: 'idle' as const
         }
       ];

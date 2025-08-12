@@ -141,7 +141,7 @@ const CriticalEventActions: React.FC<CriticalEventActionsProps> = ({
                   Automated Response Required
                 </span>
               </div>
-              <Badge variant="destructive">
+              <Badge variant="destructive" className="px-2 py-1 text-xs font-medium min-w-[60px] text-center">
                 {event.workflow.steps.length} Steps
               </Badge>
             </div>
@@ -182,20 +182,20 @@ const CriticalEventActions: React.FC<CriticalEventActionsProps> = ({
               </p>
               
               {approvalStatus === 'pending' && (
-                <div className="flex space-x-2">
+                <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
                   <Button 
                     onClick={handleApprove}
                     size="sm"
-                    className="bg-green-600 hover:bg-green-700 flex-1"
+                    className="bg-green-600 hover:bg-green-700 flex-1 min-w-0"
                   >
-                    <CheckCircle className="w-4 h-4 mr-1" />
-                    Approve & Execute
+                    <CheckCircle className="w-4 h-4 mr-1 flex-shrink-0" />
+                    <span className="truncate">Approve & Execute</span>
                   </Button>
                   <Button 
                     onClick={handleDeny}
                     size="sm"
                     variant="outline"
-                    className="border-red-400 text-red-400 hover:bg-red-900/20"
+                    className="border-red-400 text-red-400 hover:bg-red-900/20 flex-shrink-0 min-w-[80px]"
                   >
                     <XCircle className="w-4 h-4 mr-1" />
                     Deny
@@ -260,25 +260,29 @@ const AnimatedEventCard: React.FC<AnimatedEventCardProps> = ({
       )}
     >
       {/* Event Header */}
-      <div className="flex items-start justify-between mb-2">
-        <div className="flex items-center space-x-2">
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center space-x-2 flex-wrap">
           <severity.icon className={cn("w-5 h-5", severity.iconClass)} />
           <Badge variant={severity.badgeVariant}>
             {event.type.toUpperCase()}
           </Badge>
-          {event.type === 'critical' && event.workflow && (
-            <Badge variant="outline" className="text-xs bg-yellow-100/10 text-yellow-300 border-yellow-400/30">
-              WORKFLOW TRIGGERED
-            </Badge>
-          )}
         </div>
-        <div className="text-right">
+        <div className="text-right flex-shrink-0">
           <time className="text-xs text-slate-400 font-mono">{event.timestamp}</time>
           {event.location && (
             <p className="text-xs text-slate-500">{event.location}</p>
           )}
         </div>
       </div>
+      
+      {/* Workflow Triggered Badge - Separate Row */}
+      {event.type === 'critical' && event.workflow && (
+        <div className="mb-2">
+          <Badge variant="outline" className="text-xs bg-yellow-500/20 text-yellow-200 border-yellow-400/40 px-3 py-1 font-medium tracking-wide">
+            WORKFLOW TRIGGERED
+          </Badge>
+        </div>
+      )}
 
       {/* Event Content */}
       <div className="space-y-2">
@@ -338,13 +342,13 @@ const EnhancedEventStream: React.FC<EnhancedEventStreamProps> = ({
         <Activity className="w-5 h-5 text-blue-400" />
         <h2 className={cn(typography.subheading, 'text-white')}>Live Event Stream</h2>
         {isLive && (
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-2 ml-10">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
             <span className="text-xs text-green-400 font-medium">LIVE</span>
           </div>
         )}
       </div>
-      <Badge variant="secondary" className="text-xs">
+      <Badge variant="secondary" className="text-xs ml-12">
         {events.length} events
       </Badge>
     </div>
