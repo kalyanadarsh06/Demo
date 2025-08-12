@@ -65,6 +65,7 @@ const EXAMPLE_PROMPTS = [
 export default function AIAssistant({ onWorkflowGenerated }: AIAssistantProps) {
   const { addWorkflow } = useWorkflows();
   const [userInput, setUserInput] = useState('');
+  const [workflowName, setWorkflowName] = useState('');
   const [selectedSector, setSelectedSector] = useState('');
   const [buildingInfo, setBuildingInfo] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -73,6 +74,8 @@ export default function AIAssistant({ onWorkflowGenerated }: AIAssistantProps) {
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [showExamples, setShowExamples] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [currentStage, setCurrentStage] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isConfigured = geminiService.isConfigured() || apiKey;
@@ -103,6 +106,7 @@ export default function AIAssistant({ onWorkflowGenerated }: AIAssistantProps) {
 
   const resetForm = () => {
     setUserInput('');
+    setWorkflowName('');
     setSelectedSector('');
     setBuildingInfo('');
     setUploadedFile(null);
@@ -124,6 +128,27 @@ export default function AIAssistant({ onWorkflowGenerated }: AIAssistantProps) {
 
     setIsGenerating(true);
     setResult(null);
+    setProgress(5); // Start with small initial progress
+    setCurrentStage(0);
+
+    // Start progress animation immediately
+    const progressStages = [
+      { stage: 0, progress: 25, delay: 200 },   // Analyzing requirements
+      { stage: 1, progress: 50, delay: 800 },   // Mapping devices
+      { stage: 2, progress: 75, delay: 1400 },  // Validating compliance
+      { stage: 3, progress: 90, delay: 2000 },  // Optimizing workflow
+    ];
+
+    // Store timeout IDs for cleanup
+    const timeoutIds: NodeJS.Timeout[] = [];
+
+    progressStages.forEach(({ stage, progress: targetProgress, delay }) => {
+      const timeoutId = setTimeout(() => {
+        setCurrentStage(stage);
+        setProgress(targetProgress);
+      }, delay);
+      timeoutIds.push(timeoutId);
+    });
 
     try {
       // Configure the service with the API key if provided
@@ -133,6 +158,7 @@ export default function AIAssistant({ onWorkflowGenerated }: AIAssistantProps) {
 
       // Prepare context
       const context = {
+        workflowName: workflowName || undefined,
         sector: selectedSector || undefined,
         buildingInfo: buildingInfo || undefined,
         uploadedFile: uploadedFile ? {
@@ -144,6 +170,11 @@ export default function AIAssistant({ onWorkflowGenerated }: AIAssistantProps) {
 
       // Generate workflow
       const result = await geminiService.generateWorkflow(userInput, context);
+      
+      // Complete progress on success
+      setProgress(100);
+      setCurrentStage(4);
+      
       setResult(result);
 
       // Reset form after successful generation
@@ -153,6 +184,9 @@ export default function AIAssistant({ onWorkflowGenerated }: AIAssistantProps) {
 
     } catch (error) {
       console.error('Generation failed:', error);
+      // Complete progress on error
+      setProgress(100);
+      setCurrentStage(4);
       setResult({
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error occurred',
@@ -342,6 +376,17 @@ export default function AIAssistant({ onWorkflowGenerated }: AIAssistantProps) {
       <Card className="p-6">
         <div className="space-y-4">
           <div>
+            <Label htmlFor="workflow-name">Workflow Name</Label>
+            <Input
+              id="workflow-name"
+              value={workflowName}
+              onChange={(e) => setWorkflowName(e.target.value)}
+              placeholder="e.g., Active Shooter Response, Fire Emergency Protocol, Visitor Management..."
+              className="mt-2"
+            />
+          </div>
+
+          <div>
             <Label htmlFor="user-input">Describe your security workflow requirements</Label>
             <Textarea
               id="user-input"
@@ -436,23 +481,51 @@ export default function AIAssistant({ onWorkflowGenerated }: AIAssistantProps) {
               <Loader2 className="w-5 h-5 animate-spin text-primary" />
               <span className="font-medium">Generating workflow...</span>
             </div>
-            <Progress value={66} className="w-full" />
+            <Progress value={progress} className="w-full" />
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <Eye className="w-4 h-4 text-blue-500" />
-                <span>Analyzing requirements</span>
+              <div className={`flex items-center gap-2 transition-opacity duration-300 ${
+                currentStage >= 0 ? 'opacity-100' : 'opacity-50'
+              }`}>
+                <Eye className={`w-4 h-4 ${
+                  currentStage >= 0 ? 'text-blue-500' : 'text-gray-400'
+                }`} />
+                <span className={currentStage >= 0 ? 'text-white' : 'text-gray-500'}>
+                  Analyzing requirements
+                </span>
+                {currentStage > 0 && <CheckCircle className="w-3 h-3 text-green-500 ml-1" />}
               </div>
-              <div className="flex items-center gap-2">
-                <Target className="w-4 h-4 text-green-500" />
-                <span>Mapping devices</span>
+              <div className={`flex items-center gap-2 transition-opacity duration-300 ${
+                currentStage >= 1 ? 'opacity-100' : 'opacity-50'
+              }`}>
+                <Target className={`w-4 h-4 ${
+                  currentStage >= 1 ? 'text-green-500' : 'text-gray-400'
+                }`} />
+                <span className={currentStage >= 1 ? 'text-white' : 'text-gray-500'}>
+                  Mapping devices
+                </span>
+                {currentStage > 1 && <CheckCircle className="w-3 h-3 text-green-500 ml-1" />}
               </div>
-              <div className="flex items-center gap-2">
-                <Shield className="w-4 h-4 text-purple-500" />
-                <span>Validating compliance</span>
+              <div className={`flex items-center gap-2 transition-opacity duration-300 ${
+                currentStage >= 2 ? 'opacity-100' : 'opacity-50'
+              }`}>
+                <Shield className={`w-4 h-4 ${
+                  currentStage >= 2 ? 'text-purple-500' : 'text-gray-400'
+                }`} />
+                <span className={currentStage >= 2 ? 'text-white' : 'text-gray-500'}>
+                  Validating compliance
+                </span>
+                {currentStage > 2 && <CheckCircle className="w-3 h-3 text-green-500 ml-1" />}
               </div>
-              <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-yellow-500" />
-                <span>Optimizing workflow</span>
+              <div className={`flex items-center gap-2 transition-opacity duration-300 ${
+                currentStage >= 3 ? 'opacity-100' : 'opacity-50'
+              }`}>
+                <Zap className={`w-4 h-4 ${
+                  currentStage >= 3 ? 'text-yellow-500' : 'text-gray-400'
+                }`} />
+                <span className={currentStage >= 3 ? 'text-white' : 'text-gray-500'}>
+                  Optimizing workflow
+                </span>
+                {currentStage > 3 && <CheckCircle className="w-3 h-3 text-green-500 ml-1" />}
               </div>
             </div>
           </div>

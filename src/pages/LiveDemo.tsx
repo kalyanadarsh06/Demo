@@ -7,51 +7,120 @@ import { useWorkflows, type Workflow } from "@/context/WorkflowsContext";
 
 function pick<T>(arr: T[]) { return arr[Math.floor(Math.random() * arr.length)]; }
 
-function buildMessage(wf: Workflow) {
-  const devices = [
-    { type: "Camera", events: ["Object: person", "Object: vehicle", "No motion", "Tamper detected", "Blur detected"] },
-    { type: "Door Lock", events: ["Forced open", "Held open", "Lock engaged", "Access granted", "Access denied"] },
-    { type: "Badge Reader", events: ["Badge read", "Unknown badge", "Cloned badge suspected", "Two-factor required"] },
-    { type: "Sensor", events: ["Glass break", "Vibration spike", "Perimeter fence", "Smoke detected"] },
-  ];
-  const vis = ["YOLOv10: person without badge", "YOLOv10: bag left unattended", "Pattern: repeated after-hours access", "Tracking: subject across 3 cameras"];
-  const health = ["Camera 12 predicted failure (bearing noise)", "Door controller latency spike", "Badge reader offline recovered", "Storage at 85% capacity"];
-  const reports = ["Incident auto-created #" + Math.floor(Math.random()*900+100), "Report dispatched to SOC", "Evidence package compiled"];
+// Controlled demo sequence with exactly 10 events
+let demoEventIndex = 0;
+const demoEventSequence = [
+  "Access card used - Main entrance (Badge #4521)",
+  "Door unlock - Classroom 101", 
+  { message: "Camera offline - Gym #3", type: "warning" },
+  "Badge scan - Staff entrance (Badge #7832)",
+  "Visitor buzz in - Main office",
+  { 
+    message: "Smoke detected - Cafeteria sensor #7", 
+    type: "critical",
+    location: "School Cafeteria",
+    sensor: "Smoke Detector #7"
+  },
+  "Access card used - Library entrance (Badge #2341)",
+  { message: "Door sensor fault - Classroom 205", type: "warning" },
+  { 
+    message: "Weapon detected - Camera #2 (Front entrance)", 
+    type: "critical",
+    location: "Front Entrance",
+    sensor: "AI Camera #2"
+  },
+  "Badge scan - Administrative office (Badge #9876)"
+];
 
-  const bucket = pick(["device", "vision", "health", "report"]);
-  let detail = "";
-  if (bucket === "device") {
-    const d = pick(devices);
-    detail = `${d.type}: ${pick(d.events)}`;
-  } else if (bucket === "vision") {
-    detail = pick(vis);
-  } else if (bucket === "health") {
-    detail = `Health: ${pick(health)}`;
-  } else {
-    detail = pick(reports);
+function buildRealisticEvent() {
+  if (demoEventIndex >= demoEventSequence.length) {
+    // Demo complete - return null to stop generating events
+    return null;
   }
-  return `${wf.name} — ${detail}`;
+  
+  const event = demoEventSequence[demoEventIndex];
+  demoEventIndex++;
+  return event;
 }
 
 export default function LiveDemo() {
-  const { workflows } = useWorkflows();
   const [events, setEvents] = useState<EventItem[]>([]);
   const [running, setRunning] = useState(true);
 
-  const active = useMemo(() => (workflows.length ? workflows : [{ id: "ad-hoc", name: "Ad‑hoc Monitoring", steps: [], source: "template" as const }]), [workflows]);
+  // Static workflows for demo - only the two required workflows
+  const active = useMemo(() => [
+    { 
+      id: "active-shooter-lockdown", 
+      name: "Active Shooter Lockdown (K-12 School)", 
+      steps: [
+        { id: "1", label: "AI Vision Analysis", action: "Weapon Detection" },
+        { id: "2", label: "Lockdown Command", action: "Lock All Doors" },
+        { id: "3", label: "Emergency Alert", action: "Notify Police" },
+        { id: "4", label: "Facility Broadcast", action: "PA Announcement" },
+        { id: "5", label: "Emergency Alert", action: "Display Alert on Screens" }
+      ], 
+      triggers: [{ source: "camera-main-entrance", eventType: "weapon detected" }],
+      source: "template" as const 
+    },
+    { 
+      id: "fire-response-workflow", 
+      name: "Emergency Fire Response Workflow", 
+      steps: [
+        { id: "1", label: "Fire Alarm Activation", action: "Sound Fire Alarm" },
+        { id: "2", label: "Emergency Exit Unlock", action: "Unlock All Exit Doors" },
+        { id: "3", label: "Evacuation Lighting Activation", action: "Activate Emergency Lighting" },
+        { id: "4", label: "Emergency Services Notification", action: "Notify Fire Department" },
+        { id: "5", label: "Facility Broadcast", action: "PA Evacuation Announcement" },
+        { id: "6", label: "Compliance Audit Log", action: "Log Fire Response Event" }
+      ], 
+      triggers: [{ source: "fire-sensor-system", eventType: "fire detected" }],
+      source: "template" as const 
+    }
+  ], []);
+
+  const handleStart = () => {
+    // Reset demo sequence when starting
+    demoEventIndex = 0;
+    setEvents([]); // Clear previous events
+    setRunning(true);
+  };
+
+  const handleStop = () => {
+    setRunning(false);
+  };
 
   useEffect(() => {
     if (!running) return;
     const t = setInterval(() => {
-      const wf = pick(active);
+      const eventData = buildRealisticEvent();
+      
+      // If no more events, stop the demo
+      if (eventData === null) {
+        setRunning(false);
+        return;
+      }
+      
+      let eventType = "info";
+      let message = "";
+      
+      if (typeof eventData === "string") {
+        // Normal event
+        message = eventData;
+        eventType = "info";
+      } else {
+        // Warning or critical event
+        message = eventData.message;
+        eventType = eventData.type;
+      }
+      
       const e: EventItem = {
         id: `${Date.now()}`,
-        type: Math.random() > 0.9 ? "critical" : Math.random() > 0.6 ? "warning" : "info",
-        message: buildMessage(wf),
+        type: eventType as "info" | "warning" | "critical",
+        message: message,
         ts: new Date().toLocaleTimeString(),
       };
       setEvents((prev) => [e, ...prev].slice(0, 100));
-    }, 1200);
+    }, 2500); // Slightly faster for better demo flow
     return () => clearInterval(t);
   }, [active, running]);
 

@@ -84,6 +84,7 @@ export class GeminiWorkflowService {
   async generateWorkflow(
     userInput: string,
     context: {
+      workflowName?: string;
       sector?: string;
       buildingInfo?: string;
       currentTime?: string;
@@ -106,7 +107,7 @@ export class GeminiWorkflowService {
       const processingTime = Date.now() - startTime;
       
       // Parse and validate the response
-      const result = this.parseGeminiResponse(response, userInput, processingTime);
+      const result = this.parseGeminiResponse(response, userInput, processingTime, context);
       
       return result;
       
@@ -131,6 +132,7 @@ export class GeminiWorkflowService {
 "${userInput}"
 
 ## Available Context
+**Workflow Name:** ${context.workflowName || 'Auto-generated based on requirements'}
 **Building Information:** ${context.buildingInfo || 'General facility'}
 **Sector/Industry:** ${context.sector || 'General'}
 **Current Time:** ${context.currentTime || new Date().toISOString()}
@@ -183,7 +185,7 @@ Generate a workflow with:
 Respond with a JSON object in this exact format:
 {
   "workflow": {
-    "name": "Workflow Name",
+    "name": "${context.workflowName || 'Auto-generated workflow name'}",
     "description": "Brief description",
     "steps": [
       {
@@ -274,7 +276,8 @@ Respond with a JSON object in this exact format:
   private parseGeminiResponse(
     response: any, 
     originalPrompt: string, 
-    processingTime: number
+    processingTime: number,
+    context: any = {}
   ): WorkflowGenerationResult {
     try {
       const candidate = response.candidates?.[0];
@@ -319,7 +322,7 @@ Respond with a JSON object in this exact format:
       // Build the workflow with AI metadata
       const workflow: Workflow = {
         id: `ai_wf_${Date.now()}`,
-        name: parsed.workflow.name,
+        name: context.workflowName || parsed.workflow.name, // Use user-provided name if available
         description: parsed.workflow.description,
         steps: parsed.workflow.steps || [],
         triggers: parsed.workflow.triggers || [],

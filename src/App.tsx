@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Workflows from "./pages/Workflows";
 import LiveDemo from "./pages/LiveDemo";
+import EnhancedDemo from "./pages/EnhancedDemo";
 import { WorkflowsProvider } from "./context/WorkflowsContext";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/workflows" element={<Workflows />} />
             <Route path="/demo" element={<LiveDemo />} />
+            <Route path="/enhanced-demo" element={<EnhancedDemo />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
