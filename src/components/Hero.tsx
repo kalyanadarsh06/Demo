@@ -96,7 +96,7 @@ const Hero = () => {
             </p>
             <div className="mt-10 flex flex-wrap gap-4 justify-center animate-fade-in-up animation-delay-800">
               <Button asChild variant="hero" className="gap-2 text-lg px-8 py-6 hover:scale-105 transition-all duration-300">
-                <Link to="/demo"><Zap className="animate-pulse" /> Try Interactive Demo</Link>
+                <Link to="/enhanced-demo"><Zap className="animate-pulse" /> Try Interactive Demo</Link>
               </Button>
               <Button asChild variant="outline" className="text-lg px-8 py-6 hover:scale-105 transition-all duration-300">
                 <Link to="/workflows">Browse Templates</Link>

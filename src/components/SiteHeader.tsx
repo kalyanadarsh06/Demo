@@ -24,7 +24,7 @@ const SiteHeader = () => {
         <div className="flex items-center gap-3">
           <Button asChild variant="outline" className="hidden sm:inline-flex">Docs</Button>
           <Button asChild variant="hero" className="inline-flex items-center gap-2">
-            <a href="/demo"><Zap className="opacity-90" /> Launch Demo</a>
+            <a href="/enhanced-demo"><Zap className="opacity-90" /> Launch Demo</a>
           </Button>
         </div>
       </nav>
